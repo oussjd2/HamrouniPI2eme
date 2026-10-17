@@ -38,7 +38,7 @@
             <div role="status" class="notice <?= e($notice['type']) ?>"><?= e($notice['message']) ?></div>
         <?php endif ?>
         <?= $content ?>
-        <footer>Locamat · Projet Technologies Web · PHP / MVC / PDO</footer>
+        <footer>Locamat · Projet Technologies Web · PHP / MVC / PDO · <a href="<?= e(url('credits-photos')) ?>">Crédits photos</a></footer>
     </main>
 </div>
 </body>

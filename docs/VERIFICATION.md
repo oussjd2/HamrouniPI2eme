@@ -80,3 +80,23 @@ Les données temporaires du navigateur ont été retirées après vérification 
 - [x] Corrections et documentation enregistrées dans le dépôt privé.
 
 La vérification est limitée à Chrome sur Windows et à des tailles d’écran simulées. Safari, Firefox et téléphone physique n’ont pas été testés. Aucun défaut bloquant connu ne reste à l’issue de l’étape 18.
+
+## Extension demandée : photos produit
+
+Ajout demandé après l’étape 18 : une photo facultative par équipement, sept illustrations initiales, ajout/remplacement/suppression depuis le formulaire inventaire. Les photos sont affichées dans le catalogue, les fiches et les listes de gestion; un aperçu est disponible avant enregistrement. Les produits sans photo affichent une illustration neutre. Aucune nouvelle entité ni aucun framework.
+
+La base locale a été mise à jour sans réinitialisation avec `scripts/update-product-images.php`. La seconde exécution a confirmé qu’aucune donnée n’était modifiée. Le schéma et les données initiales couvrent également une installation neuve. Les photos initiales sont conservées localement, avec sources, auteurs et licences dans `public/assets/products/credits.json` et la page publique « Crédits photos ».
+
+Validation après ajout :
+
+- 45 fichiers PHP sans erreur de syntaxe, JavaScript valide, Composer valide et aucune alerte de dépendance connue lors de la mise à jour du lock.
+- 71 contrôles métier et 68 contrôles HTTP existants réussis.
+- 22 contrôles dédiés dans `tests/images.php` : transferts réels JPG/PNG/WebP, conservation sans remplacement, nettoyage des anciens fichiers, suppression, faux JPG/SVG/plus de 2 Mo refusés, fichiers manquants, noms aléatoires, stockage hors webroot, absence de chemin contrôlé par le POST, illustration neutre et crédits. Les fichiers partagés des illustrations initiales sont préservés.
+- 17 points de contrôle navigateur réussis dans Chrome : sept photos du catalogue et des fiches chargées, miniatures, aperçu, création avec fichier, modification conservant la photo, remplacement, suppression, contrôles JS et mise en page de cinq surfaces à 320/390/768 px. Aucune erreur console ni image cassée. Desktop vérifié à 1440 px.
+- Captures de catalogue, fiche, formulaire et gestion inspectées visuellement. Proportions conservées sans recadrage et sans débordement du document; tableaux défilants sur téléphone.
+
+Preuves hors dépôt :
+`C:\Users\OUSSAMA\.codex\visualizations\2026\10\17\01a14acc-8e3d-7ed1-9bde-b710a0217520\product-images`.
+Résultat principal : `results.json`; captures : `catalogue-desktop.png`, `camera-detail-desktop.png`, `camera-detail-mobile.png`, `image-form-mobile.png` et `management-mobile.png`.
+
+Les enregistrements et fichiers temporaires de cette validation ont été retirés. Base conservée à 3 utilisateurs, 3 catégories, 7 équipements illustrés, 0 location.

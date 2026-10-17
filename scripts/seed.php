@@ -16,6 +16,10 @@ function seedDemo(): void {
             [3,'Table pliante','Table pliante pour réunions et événements, à restituer propre.','8.00',20,0,0,4],
             [3,'Microphone sans fil','Microphone avec récepteur, alimentation et pochette.','18.00',3,1,0,2],
         ];
-        foreach ($products as $product) { DB::query('INSERT INTO equipements(categorie_id,nom,description,tarif_journalier,quantite_totale,quantite_maintenance,quantite_endommagee,seuil_alerte) VALUES(?,?,?,?,?,?,?,?)',$product); }
+        $photos=require ROOT.'/config/product_images.php';
+        foreach ($products as $product) {
+            $product[]='assets/products/'.$photos[$product[1]];
+            DB::query('INSERT INTO equipements(categorie_id,nom,description,tarif_journalier,quantite_totale,quantite_maintenance,quantite_endommagee,seuil_alerte,image_path) VALUES(?,?,?,?,?,?,?,?,?)',$product);
+        }
     });
 }

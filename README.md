@@ -19,7 +19,7 @@ Ces comptes sont des données de démonstration locale. Les mots de passe sont h
 
 ## Installation sur une autre machine
 
-Prévoir XAMPP avec PHP 8.0 ou supérieur, PDO MySQL, mbstring, DOM, XML, iconv et Composer. PHP doit être en 64 bits pour les calculs entiers. Pour lancer les tests HTTP, l’extension cURL est nécessaire.
+Prévoir XAMPP avec PHP 8.0 ou supérieur, PDO MySQL, mbstring, fileinfo, DOM, XML, iconv et Composer. PHP doit être en 64 bits pour les calculs entiers. Pour lancer les tests HTTP, l’extension cURL est nécessaire.
 
 1. Cloner le dépôt privé dans un dossier de travail, hors du répertoire public Apache.
 2. Copier `config/example.php` vers `config/local.php` et renseigner les accès MySQL/MariaDB. Ce fichier local est ignoré par Git.
@@ -65,11 +65,26 @@ vendor/           Bibliothèques PDF installées avec Composer, ignorées
 - CRUD Utilisateur, Catégorie Équipement, Équipement et Location, avec règles de suppression pour préserver l’historique.
 - Authentification par session et autorisations côté serveur pour les trois rôles.
 - Catalogue, recherche multicritères, stock, seuils d’alerte et quantités disponibles/en location/en maintenance/endommagées.
+- Photos dans le catalogue, les fiches et le back-office. Le responsable inventaire peut ajouter, remplacer ou supprimer une photo, avec aperçu avant enregistrement (JPG, PNG ou WebP, maximum 2 Mo).
 - Demandes, confirmation, départ, retour, contrôle inventaire, frais et paiement intégral enregistré.
 - Contrats, factures provisoires/définitives et reçus PDF générés avec Dompdf, bibliothèque sans framework.
 - Requêtes PDO préparées, échappement HTML, CSRF, validation PHP et aide JavaScript. Aucune validation ne dépend uniquement du HTML.
 
 Les règles détaillées sont dans [docs/SCOPE.md](docs/SCOPE.md). Les paiements sont enregistrés manuellement : aucun service bancaire n’est intégré. Les prix de démonstration sont en TND, sans règle fiscale ajoutée au sujet.
+
+## Photos et mise à jour d’une installation existante
+
+Les sept équipements initiaux disposent de photos locales d’illustration issues de Wikimedia Commons. Sources, auteurs et licences sont accessibles par le lien « Crédits photos » en pied de page et dans `public/assets/products/credits.json`. Ces fichiers sont inclus dans le dépôt : aucune connexion externe n’est nécessaire pour afficher les produits.
+
+Pour une base créée avant l’ajout des photos, exécuter une fois :
+
+```powershell
+& 'C:\Users\OUSSAMA\Desktop\tools\xampp\php\php.exe' scripts\update-product-images.php
+```
+
+La mise à jour ajoute uniquement le champ `image_path` et associe les illustrations aux produits initiaux. Elle conserve les autres données et ne réinitialise pas la base. Une nouvelle exécution ne remplace pas les photos modifiées ou supprimées. Les installations neuves reçoivent directement le schéma et les illustrations à jour.
+
+Les fichiers envoyés sont enregistrés dans `storage/product-images`, hors du dossier public, avec noms aléatoires et contrôle du type réel, de la taille et des dimensions. Une route dédiée sert uniquement ces images. Les photos remplacées/supprimées sont nettoyées. Sauvegarder ce dossier **avec la base** lors d’une migration vers une autre machine; il est ignoré par Git. Les illustrations initiales restent dans `public/assets/products`.
 
 ## Vérification automatisée
 
@@ -80,11 +95,13 @@ $phpExe = 'C:\Users\OUSSAMA\Desktop\tools\xampp\php\php.exe'
 & $phpExe scripts\check.php
 & $phpExe tests\integration.php
 & $phpExe tests\http.php 'http://localhost/hamrouni/'
+& $phpExe tests\images.php 'http://localhost/hamrouni/'
 ```
 
 - `check.php` vérifie la syntaxe PHP de l’application et des scripts.
 - `integration.php` installe une base `hamrouni_test_*` isolée, exerce les règles métier et la génération PDF, puis supprime uniquement cette base de test.
 - `http.php` vérifie les contrôleurs à travers Apache, sans navigateur. Il crée ses propres enregistrements temporaires et les supprime en fin de test. Les comptes de démonstration doivent conserver leur mot de passe initial pour ce scénario.
+- `images.php` vérifie les transferts multipart réels, types de fichiers, remplacement/suppression, nettoyage et crédits. Il nettoie également ses enregistrements temporaires.
 
 Les journaux applicatifs sont dans `storage/logs/application.log`. Les erreurs techniques ne sont pas affichées aux visiteurs.
 

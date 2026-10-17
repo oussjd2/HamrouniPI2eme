@@ -21,6 +21,8 @@ Acceptation personnelle et préparation de la présentation avec l’utilisateur
 
 Derniers résultats : 71 contrôles métier, 68 contrôles HTTP, 43 points de contrôle navigateur initiaux et 24 ciblés après correction. Cinq PDF ordinaires et trois variantes longues inspectés (11 pages). Les saisies retour/inspection sont conservées après erreur; case d’alerte alignée; PDF corrigés pour e-mail long et pagination. Base de démonstration restaurée à 3 utilisateurs, 3 catégories, 7 équipements, 0 location. Captures hors dépôt dans le dossier indiqué par VERIFICATION.md.
 
+Extension ultérieure demandée et terminée : photos produit. Champ `equipements.image_path` ajouté sans perte de données; sept photos locales avec crédits; ajout/remplacement/suppression par inventaire, aperçu et affichage catalogue/fiches/gestion. Fichiers utilisateurs dans `storage/product-images`, ignorés par Git : les sauvegarder avec la base. Formats JPG/PNG/WebP, maximum 2 Mo, vérifiés par fileinfo/getimagesize. Migration d’une ancienne installation : `scripts/update-product-images.php`, déjà appliquée ici. Installations neuves couvertes par le schéma et seed mis à jour. Résultats : 22 contrôles photos, 17 contrôles navigateur, régressions 71/68 réussies, 45 fichiers PHP valides. Preuves dans le sous-dossier `product-images` indiqué par VERIFICATION.md.
+
 ## Points métier à conserver
 
 - Produits avec quantités; une location = un produit × une quantité.

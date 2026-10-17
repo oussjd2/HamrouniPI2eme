@@ -3,11 +3,13 @@ declare(strict_types=1);
 require dirname(__DIR__) . '/app/bootstrap.php';
 
 use App\Core\{Auth,View,HttpException};
-use App\Controllers\{AuthController,CatalogueController,ManagementController,LocationController,DocumentController};
+use App\Controllers\{AuthController,CatalogueController,ManagementController,LocationController,DocumentController,ImageController};
 
 $routes=[
     'catalogue'=>[CatalogueController::class,'index',['GET']],
     'equipement'=>[CatalogueController::class,'show',['GET']],
+    'image'=>[ImageController::class,'show',['GET']],
+    'credits-photos'=>[ImageController::class,'credits',['GET']],
     'connexion'=>[AuthController::class,'login',['GET','POST']],
     'inscription'=>[AuthController::class,'register',['GET','POST']],
     'deconnexion'=>[AuthController::class,'logout',['POST']],

@@ -3,6 +3,6 @@
   "description": "Projet universitaire de location d'équipements en PHP MVC et PDO",
   "type": "project",
   "license": "proprietary",
-  "require": {"php": ">=8.0", "ext-pdo": "*", "ext-pdo_mysql": "*", "ext-mbstring": "*", "dompdf/dompdf": "^3.1"},
+  "require": {"php": ">=8.0", "ext-pdo": "*", "ext-pdo_mysql": "*", "ext-mbstring": "*", "ext-fileinfo": "*", "dompdf/dompdf": "^3.1"},
   "autoload": {"psr-4": {"App\\": "app/"}}
 }

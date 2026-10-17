@@ -20,6 +20,7 @@ CREATE TABLE equipements (
     nom VARCHAR(120) NOT NULL,
     description TEXT NOT NULL,
     tarif_journalier DECIMAL(10,2) NOT NULL,
+    image_path VARCHAR(190) NULL,
     quantite_totale INT UNSIGNED NOT NULL,
     quantite_maintenance INT UNSIGNED NOT NULL DEFAULT 0,
     quantite_endommagee INT UNSIGNED NOT NULL DEFAULT 0,

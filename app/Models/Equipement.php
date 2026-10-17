@@ -2,6 +2,7 @@
 namespace App\Models;
 use App\Core\Database as DB;
 use App\Core\Validation as V;
+use App\Core\ProductImage;
 use DomainException;
 
 final class Equipement {
@@ -56,9 +57,13 @@ final class Equipement {
     public static function available(array $equipment, string $start, string $end, int $exclude = 0): int {
         return max(0,(int) $equipment['quantite_totale'] - (int) $equipment['quantite_maintenance'] - (int) $equipment['quantite_endommagee'] - self::reservedPeak((int) $equipment['id'],$start,$end,$exclude));
     }
-    public static function save(array $data, ?int $id): int {
-        return DB::transaction(function () use ($data,$id) {
-            if ($id && !self::find($id,true)) { throw new DomainException('Équipement introuvable.'); }
+    public static function save(array $data, ?int $id, ?array $photo = null): int {
+        $newImage=null; $oldImage=null; $image=null;
+        try {
+        $savedId=DB::transaction(function () use ($data,$id,$photo,&$newImage,&$oldImage,&$image) {
+            $old=$id ? self::find($id,true) : null;
+            if ($id && !$old) { throw new DomainException('Équipement introuvable.'); }
+            $oldImage=$old['image_path'] ?? null;
             $nom = V::text($data,'nom','Nom',120);
             $description = V::text($data,'description','Description',4000,false);
             $category = V::integer($data,'categorie_id','Catégorie',1);
@@ -70,17 +75,26 @@ final class Equipement {
             $threshold = V::integer($data,'seuil_alerte',"Seuil d'alerte");
             if ($maintenance + $damaged > $total) { throw new DomainException('Les quantités indisponibles dépassent le stock total.'); }
             if ($id && $total - $maintenance - $damaged < self::reservedPeak($id,date('Y-m-d'),'2100-12-31')) { throw new DomainException('Ce stock ne permet pas de couvrir les locations réservées ou en cours.'); }
-            $params = [$category,$nom,$description,$price,$total,$maintenance,$damaged,$threshold];
-            if ($id) { $params[] = $id; DB::query('UPDATE equipements SET categorie_id=?,nom=?,description=?,tarif_journalier=?,quantite_totale=?,quantite_maintenance=?,quantite_endommagee=?,seuil_alerte=? WHERE id=?',$params); }
-            else { DB::query('INSERT INTO equipements(categorie_id,nom,description,tarif_journalier,quantite_totale,quantite_maintenance,quantite_endommagee,seuil_alerte) VALUES(?,?,?,?,?,?,?,?)',$params); $id = (int) DB::connection()->lastInsertId(); }
+            $image=($data['remove_photo'] ?? '')==='1' ? null : $oldImage;
+            $newImage=ProductImage::store($photo);
+            if ($newImage!==null) { $image=$newImage; }
+            $params = [$category,$nom,$description,$price,$total,$maintenance,$damaged,$threshold,$image];
+            if ($id) { $params[] = $id; DB::query('UPDATE equipements SET categorie_id=?,nom=?,description=?,tarif_journalier=?,quantite_totale=?,quantite_maintenance=?,quantite_endommagee=?,seuil_alerte=?,image_path=? WHERE id=?',$params); }
+            else { DB::query('INSERT INTO equipements(categorie_id,nom,description,tarif_journalier,quantite_totale,quantite_maintenance,quantite_endommagee,seuil_alerte,image_path) VALUES(?,?,?,?,?,?,?,?,?)',$params); $id = (int) DB::connection()->lastInsertId(); }
             return $id;
         });
+        } catch (\Throwable $e) { ProductImage::remove($newImage); throw $e; }
+        if ($oldImage!==$image) { ProductImage::remove($oldImage); }
+        return $savedId;
     }
     public static function delete(int $id): void {
-        DB::transaction(function () use ($id) {
-            if (!self::find($id,true)) { throw new DomainException('Équipement introuvable.'); }
+        $image=DB::transaction(function () use ($id) {
+            $equipment=self::find($id,true);
+            if (!$equipment) { throw new DomainException('Équipement introuvable.'); }
             if (DB::query('SELECT id FROM locations WHERE equipement_id=? LIMIT 1',[$id])->fetch()) { throw new DomainException('Cet équipement est lié à des locations. Suppression impossible.'); }
             DB::query('DELETE FROM equipements WHERE id=?',[$id]);
+            return $equipment['image_path'];
         });
+        ProductImage::remove($image);
     }
 }

@@ -30,3 +30,30 @@ if (rental) {
     };
     rental.addEventListener('input', updateEstimate); rental.addEventListener('change', updateEstimate); updateEstimate();
 }
+const photoInput = document.getElementById('product-photo');
+if (photoInput) {
+    const form = photoInput.form;
+    const preview = document.getElementById('photo-preview');
+    const original = preview.getAttribute('src');
+    const remove = form.elements.namedItem('remove_photo');
+    photoInput.addEventListener('change', () => {
+        const file = photoInput.files[0];
+        const error = form.querySelector('.form-error');
+        error.textContent = '';
+        if (!file) { preview.src = remove?.checked ? 'assets/product-placeholder.svg' : original; return; }
+        if (file.size > 2 * 1024 * 1024 || (file.type && !['image/jpeg', 'image/png', 'image/webp'].includes(file.type))) {
+            error.textContent = 'Photo : choisissez un fichier JPG, PNG ou WebP de 2 Mo maximum.';
+            photoInput.value = '';
+            preview.src = remove?.checked ? 'assets/product-placeholder.svg' : original;
+            return;
+        }
+        if (remove) remove.checked = false;
+        const reader = new FileReader();
+        reader.addEventListener('load', () => { preview.src = reader.result; });
+        reader.readAsDataURL(file);
+    });
+    remove?.addEventListener('change', () => {
+        if (remove.checked) { photoInput.value = ''; preview.src = 'assets/product-placeholder.svg'; }
+        else preview.src = original;
+    });
+}

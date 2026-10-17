@@ -1,0 +1,5 @@
+<a class="back" href="<?= e(url()) ?>">Retour au catalogue</a><div class="page-heading"><h1>Crédits photos</h1></div>
+<p class="muted">Photos d’illustration des équipements de démonstration, conservées localement. Elles ne décrivent pas un modèle contractuel précis. Les fichiers fournis par les utilisateurs remplacent ces illustrations.</p>
+<div class="table-wrap"><table><thead><tr><th>Photo</th><th>Auteur</th><th>Source et licence</th></tr></thead><tbody>
+<?php foreach ($credits as $credit): ?><tr><td><img class="equipment-thumb" src="assets/products/<?= e($credit['file']) ?>" alt="<?= e($credit['title']) ?>" width="64" height="52" loading="lazy"></td><td><?= e($credit['author']) ?></td><td><a href="<?= e($credit['source']) ?>" target="_blank" rel="noopener noreferrer"><?= e($credit['title']) ?></a><br><?php if (!empty($credit['license_url'])): ?><a href="<?= e($credit['license_url']) ?>" target="_blank" rel="noopener noreferrer"><?= e($credit['license']) ?></a><?php else: ?><?= e($credit['license']) ?><?php endif ?><small>Copie locale de la photo, sans retouche.</small></td></tr><?php endforeach ?>
+</tbody></table></div>

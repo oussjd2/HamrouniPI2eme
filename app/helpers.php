@@ -19,3 +19,10 @@ function isRole(string ...$roles): bool { return user() && in_array(user()['role
 function field(string $name, string $label, $value = '', string $type = 'text', string $hint = ''): void {
     echo '<label>' . e($label) . '<input name="' . e($name) . '" type="' . e($type) . '" value="' . e($value) . '">' . ($hint ? '<small>' . e($hint) . '</small>' : '') . '</label>';
 }
+function productImage(array $equipment): string {
+    $image=$equipment['image_path'] ?? null;
+    $uploaded=App\Core\ProductImage::uploadedFile($image);
+    if ($uploaded && is_file($uploaded)) { return url('image',['id'=>$equipment['id']]); }
+    if (is_string($image) && preg_match('~^assets/products/[a-z0-9-]+\.jpg$~D',$image)) { return $image; }
+    return 'assets/product-placeholder.svg';
+}

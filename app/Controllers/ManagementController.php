@@ -27,9 +27,15 @@ final class ManagementController {
         if ($_SERVER['REQUEST_METHOD']==='POST') {
             try {
                 if ($entity==='utilisateurs') { $class::save($_POST,$id,$actor['role'],(int) $actor['id']); }
+                elseif ($entity==='equipements') { $class::save($_POST,$id,$_FILES['photo'] ?? null); }
                 else { $class::save($_POST,$id); }
                 \flash('Enregistrement effectué.'); \redirect('gestion',['entite'=>$entity]);
-            } catch (DomainException $e) { $error=$e->getMessage(); $row=$_POST+($row ?: []); }
+            } catch (DomainException $e) {
+                $error=$e->getMessage();
+                $oldImage=$row['image_path'] ?? null;
+                $row=$_POST+($row ?: []);
+                if ($entity==='equipements') { $row['image_path']=$oldImage; }
+            }
         }
         $title=($id ? 'Modifier' : 'Ajouter') . ' — ' . $title;
         View::render('management/form',compact('entity','title','row','id','error')+['categories'=>CategorieEquipement::all()]);

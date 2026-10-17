@@ -1,5 +1,5 @@
 <a class="back" href="<?= e(url('gestion',['entite'=>$entity])) ?>">Retour à la liste</a><div class="page-heading"><h1><?= e($row['nom']) ?></h1><a class="button" href="<?= e(url('gestion-form',['entite'=>$entity,'id'=>$id])) ?>">Modifier</a></div>
-<div class="panel"><dl class="details">
+<div class="panel"><?php if ($entity==='equipements'): ?><img class="management-picture" src="<?= e(productImage($row)) ?>" alt="<?= e($row['nom']) ?>" width="640" height="420"><?php endif ?><dl class="details">
 <?php
 $fields=$entity==='utilisateurs' ? ['nom'=>'Nom','prenom'=>'Prénom','email'=>'E-mail','role'=>'Rôle'] : ($entity==='categories' ? ['nom'=>'Nom','description'=>'Description'] : ['nom'=>'Nom','categorie'=>'Catégorie','description'=>'Description','tarif_journalier'=>'Tarif journalier','quantite_totale'=>'Stock total','quantite_maintenance'=>'En maintenance','quantite_endommagee'=>'Endommagé','seuil_alerte'=>'Seuil d’alerte']);
 foreach ($fields as $key=>$caption): ?>

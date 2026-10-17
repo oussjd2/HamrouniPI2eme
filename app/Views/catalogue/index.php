@@ -4,6 +4,7 @@
 <div class="catalogue-grid">
 <?php foreach ($equipements as $equipment): ?>
     <article class="product panel">
+        <a class="product-picture" href="<?= e(url('equipement',['id'=>$equipment['id']])) ?>" aria-label="Voir <?= e($equipment['nom']) ?>"><img src="<?= e(productImage($equipment)) ?>" alt="<?= e($equipment['nom']) ?>" width="640" height="420" loading="lazy"></a>
         <span class="category"><?= e($equipment['categorie']) ?></span>
         <h2><a href="<?= e(url('equipement',['id'=>$equipment['id']])) ?>"><?= e($equipment['nom']) ?></a></h2>
         <p><?= e(mb_strimwidth($equipment['description'],0,170,'…')) ?></p>

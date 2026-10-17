@@ -11,6 +11,7 @@ Application universitaire PHP 8, MVC, PDO MySQL, sans framework. Interface fran�
 ## Règles retenues
 
 - Une location porte sur un produit et une quantité. Aucun panier, paiement en ligne ou entité supplémentaire.
+- Chaque équipement peut avoir une photo facultative, ajoutée/remplacée/supprimée par le responsable inventaire : JPG, PNG ou WebP, 2 Mo maximum, 6 000 pixels par côté et 24 mégapixels. Les produits sans photo utilisent une illustration neutre. Les sept produits initiaux sont illustrés et les crédits sont accessibles au public.
 - Dates inclusives : même date = un jour. Prix = quantité × jours × tarif appliqué + frais. Devise de démonstration : TND, prix arrondis au centime, sans fiscalité ajoutée non demandée.
 - Les demandes ne réservent pas le stock. La confirmation vérifie la capacité maximale simultanément réservée, pas la somme des réservations successives.
 - Les quantités confirmées/en cours/à contrôler réservent le stock. Un départ en retard et les retours non contrôlés bloquent le stock jusqu'à validation; aucune remise en location automatique.
