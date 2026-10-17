@@ -15,6 +15,7 @@ date_default_timezone_set($config['timezone']);
 App\Core\Database::configure($config);
 require __DIR__ . '/helpers.php';
 if (PHP_SAPI !== 'cli') {
+    ini_set('display_errors', '0');
     ini_set('session.use_strict_mode', '1');
     session_name($config['session_name']);
     session_set_cookie_params(['httponly' => true, 'samesite' => 'Lax', 'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off', 'path' => '/']);

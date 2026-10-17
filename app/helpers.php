@@ -1,5 +1,5 @@
 <?php
-function e($value): string { return htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); }
+function e($value): string { return htmlspecialchars(is_scalar($value) ? (string) $value : '', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); }
 function url(string $route = 'catalogue', array $params = []): string {
     return 'index.php?' . http_build_query(['r' => $route] + $params);
 }

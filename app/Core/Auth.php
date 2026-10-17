@@ -11,7 +11,7 @@ final class Auth {
         return $user;
     }
     public static function checkCsrf(): void {
-        if (!is_string($_POST['csrf'] ?? null) || !hash_equals($_SESSION['csrf'] ?? '', $_POST['csrf']) || empty($_SESSION['csrf'])) { throw new HttpException(419, 'La session du formulaire a expiré. Rechargez la page.'); }
+        if (!is_string($_POST['csrf'] ?? null) || !hash_equals($_SESSION['csrf'] ?? '', $_POST['csrf']) || empty($_SESSION['csrf'])) { throw new HttpException(403, 'La session du formulaire a expiré. Rechargez la page.'); }
     }
     public static function login(array $user): void { session_regenerate_id(true); $_SESSION['user_id'] = $user['id']; unset($_SESSION['csrf']); }
 }

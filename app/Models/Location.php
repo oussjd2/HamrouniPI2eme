@@ -32,7 +32,7 @@ final class Location {
             $equipment = Equipement::find($equipmentId,true);
             if (!$equipment) { throw new DomainException('Équipement introuvable.'); }
             // Re-read under row lock: a confirmation may have raced the initial read.
-            if ($id) { $locked = DB::query('SELECT statut FROM locations WHERE id=? FOR UPDATE',[$id])->fetch(); if (!$locked || $locked['statut'] !== 'en_attente') { throw new DomainException('Cette demande vient de changer.'); } }
+            if ($id) { $locked = DB::query('SELECT statut FROM locations WHERE id=? FOR UPDATE',[$id])->fetch(); if (!$locked || $locked['statut'] !== 'en_attente') { throw new DomainException('Cette demande vient de changer.'); } self::accessible($id,$actor); }
             $clientId = $actor['role'] === 'client' ? (int) $actor['id'] : V::integer($data,'client_id','Client',1);
             $client = Utilisateur::find($clientId);
             if (!$client || $client['role'] !== 'client') { throw new DomainException('Un compte client valide est nécessaire.'); }
@@ -40,6 +40,7 @@ final class Location {
             $start = V::date($data['date_debut'] ?? ''); $end = V::date($data['date_fin'] ?? '');
             if ($start < date('Y-m-d') || $end < $start || self::days(['date_debut'=>$start,'date_fin'=>$end]) > 366) { throw new DomainException('Dates : début à partir d’aujourd’hui, fin après début, durée maximale 366 jours.'); }
             if ($quantity > Equipement::available($equipment,$start,$end,$id ?? 0)) { throw new DomainException('Quantité insuffisante pour les dates demandées.'); }
+            self::validateTotal($quantity,self::days(['date_debut'=>$start,'date_fin'=>$end]),$equipment['tarif_journalier']);
             $params = [$clientId,$equipmentId,$quantity,$start,$end,$equipment['tarif_journalier']];
             if ($id) { $params[]=$id; DB::query('UPDATE locations SET client_id=?,equipement_id=?,quantite=?,date_debut=?,date_fin=?,tarif_applique=? WHERE id=?',$params); }
             else { DB::query("INSERT INTO locations(client_id,equipement_id,quantite,date_debut,date_fin,tarif_applique,remarques_retour) VALUES(?,?,?,?,?,?, '')",$params); $id=(int) DB::connection()->lastInsertId(); }
@@ -52,6 +53,7 @@ final class Location {
             $equipment = Equipement::find((int) $initial['equipement_id'],true);
             DB::query('SELECT id FROM locations WHERE id=? FOR UPDATE',[$id]);
             $row = self::accessible($id,$actor);
+            if ((int) $row['equipement_id'] !== (int) $initial['equipement_id']) { throw new DomainException('L’équipement de cette demande vient de changer. Rechargez la page.'); }
             $role = $actor['role']; $status = $row['statut'];
             if ($action === 'annuler' && in_array($status,['en_attente','confirmee'],true) && in_array($role,['client','agent'],true)) {
                 DB::query("UPDATE locations SET statut='annulee' WHERE id=?",[$id]); return;
@@ -60,6 +62,7 @@ final class Location {
             if ($action === 'confirmer' && $role === 'agent' && $status === 'en_attente') {
                 if ($row['date_debut'] < date('Y-m-d')) { throw new DomainException('La date de début est passée. Modifiez la demande avant confirmation.'); }
                 if ((int) $row['quantite'] > Equipement::available($equipment,$row['date_debut'],$row['date_fin'],$id)) { throw new DomainException('Stock insuffisant : une autre réservation a été confirmée.'); }
+                self::validateTotal((int) $row['quantite'],self::days($row),$equipment['tarif_journalier']);
                 $snapshot = json_encode(['equipement'=>$equipment['nom'],'categorie'=>$equipment['categorie'],'client_nom'=>$row['client_nom'],'client_prenom'=>$row['client_prenom'],'client_email'=>$row['client_email']], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
                 DB::query("UPDATE locations SET statut='confirmee',agent_id=?,tarif_applique=?,snapshot=? WHERE id=?",[$actor['id'],$equipment['tarif_journalier'],$snapshot,$id]); return;
             }
@@ -75,6 +78,7 @@ final class Location {
                 if ($date < $row['date_debut'] || $date > date('Y-m-d')) { throw new DomainException('Date de retour : entre le début de la location et aujourd’hui.'); }
                 [$maintenance,$damaged] = self::returnQuantities($data,(int) $row['quantite']);
                 $fees=V::decimal(V::cents($data['frais_additionnels'] ?? ''));
+                self::validateTotal((int) $row['quantite'],self::days($row),$row['tarif_applique'],$fees);
                 $remarks=V::text($data,'remarques_retour','Remarques',2000,false);
                 DB::query("UPDATE locations SET statut='retour_a_controler',date_retour=?,retour_maintenance=?,retour_endommage=?,frais_additionnels=?,remarques_retour=?,agent_id=? WHERE id=?",[$date,$maintenance,$damaged,$fees,$remarks,$actor['id'],$id]); return;
             }
@@ -97,6 +101,9 @@ final class Location {
         $damaged=V::integer($data,'retour_endommage','Quantité endommagée',0,$quantity);
         if ($maintenance+$damaged>$quantity) { throw new DomainException('Les quantités en maintenance et endommagées dépassent la quantité retournée.'); }
         return [$maintenance,$damaged];
+    }
+    private static function validateTotal(int $quantity, int $days, string $price, string $fees = '0.00'): void {
+        if (V::cents($price)*$quantity*$days+V::cents($fees)>999999999999) { throw new DomainException('Le montant total dépasse la limite autorisée.'); }
     }
     public static function delete(int $id, array $actor): void {
         if (!in_array($actor['role'],['client','agent'],true)) { throw new HttpException(403,'Suppression non autorisée.'); }

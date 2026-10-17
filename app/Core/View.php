@@ -2,6 +2,7 @@
 namespace App\Core;
 final class View {
     public static function render(string $template, array $data = [], int $status = 200): void {
+        global $config;
         http_response_code($status);
         extract($data, EXTR_SKIP);
         ob_start();
