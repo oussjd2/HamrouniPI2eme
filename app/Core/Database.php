@@ -10,6 +10,9 @@ final class Database {
         if (self::$pdo === null) {
             $c = self::$config;
             self::$pdo = new PDO("mysql:host={$c['db_host']};port={$c['db_port']};dbname={$c['db_name']};charset=utf8mb4", $c['db_user'], $c['db_password'], [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC, PDO::ATTR_EMULATE_PREPARES => false]);
+            // Equipment locks serialize writers; refresh subsequent reads after waiting
+            // for a lock instead of reusing an earlier REPEATABLE READ snapshot.
+            self::$pdo->exec('SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED');
         }
         return self::$pdo;
     }

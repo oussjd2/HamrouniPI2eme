@@ -119,6 +119,40 @@ try {
     U::delete($uid,'inventaire',(int)$manager['id']); check(U::find($uid)===null,'Suppression utilisateur sans historique');
     rejects(fn()=>V::cents('1.999'),'Montant à trois décimales refusé');
     rejects(fn()=>V::integer(['x'=>[]],'x','Quantité'),'Paramètre tableau malformé refusé');
+    // An overdue departure holds stock until the return is checked.
+    $overdueEquipment=E::save(array_replace($product,['nom'=>'Retard','quantite_totale'=>2]),null);
+    $overdue=L::save(array_replace($request,['equipement_id'=>$overdueEquipment,'quantite'=>2,'date_fin'=>$today]),null,$client);
+    L::action($overdue,'confirmer',[],$agent); L::action($overdue,'depart',[],$agent);
+    $yesterday=date('Y-m-d',strtotime('-1 day'));
+    DB::query('UPDATE locations SET date_debut=?,date_fin=? WHERE id=?',[$yesterday,$yesterday,$overdue]);
+    check(E::available(E::find($overdueEquipment),$today,date('Y-m-d',strtotime('+30 days')))===0,'Retard non rendu bloque le stock futur');
+    // Two separate PHP processes attempt to confirm the same remaining capacity.
+    $raceEquipment=E::save(array_replace($product,['nom'=>'Concurrence','quantite_totale'=>2]),null);
+    $raceRequest=array_replace($request,['equipement_id'=>$raceEquipment,'quantite'=>2,'date_fin'=>$today]);
+    $raceA=L::save($raceRequest,null,$client); $raceB=L::save($raceRequest,null,$client);
+    $pdo=DB::connection(); $pdo->beginTransaction(); E::find($raceEquipment,true);
+    $processes=[];
+    try {
+        foreach ([$raceA,$raceB] as $raceId) {
+            $pipes=[];
+            $process=proc_open([PHP_BINARY,ROOT.'/tests/confirmation-worker.php',$testDb,(string)$raceId],[0=>['pipe','r'],1=>['pipe','w'],2=>['pipe','w']],$pipes,ROOT);
+            if (!is_resource($process)) { throw new RuntimeException('Impossible de lancer le test concurrent.'); }
+            fclose($pipes[0]); $processes[]=[$process,$pipes];
+        }
+        foreach ($processes as [$process,$pipes]) { if (trim(fgets($pipes[1]))!=='READY') { throw new RuntimeException('Processus concurrent non prêt.'); } }
+        usleep(250000); $pdo->commit();
+        $outputs=[];
+        foreach ($processes as [$process,$pipes]) {
+            $outputs[]=trim(stream_get_contents($pipes[1])); $errors=stream_get_contents($pipes[2]);
+            fclose($pipes[1]); fclose($pipes[2]);
+            if (proc_close($process)!==0) { throw new RuntimeException('Échec du processus concurrent : '.$errors); }
+        }
+        sort($outputs);
+        check($outputs===['CONFIRMED','REJECTED'],'Deux confirmations concurrentes : une seule acceptée');
+        check((int)DB::query("SELECT SUM(quantite) FROM locations WHERE equipement_id=? AND statut='confirmee'",[$raceEquipment])->fetchColumn()===2,'Aucun dépassement de stock après concurrence');
+    } finally {
+        if ($pdo->inTransaction()) { $pdo->rollBack(); }
+    }
     echo "\n$checks contrôles réussis. Base isolée : $testDb\n";
 } catch (Throwable $e) { fwrite(STDERR,(string)$e.PHP_EOL); $exit=1; }
 finally {
