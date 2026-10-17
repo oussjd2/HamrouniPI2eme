@@ -1,6 +1,6 @@
 <!doctype html><html lang="fr"><head><meta charset="utf-8"><style>
 @page { margin: 45px 45px 55px; } body { font-family: 'DejaVu Sans',sans-serif; color: #172744; font-size: 10px; line-height: 1.6; } h1 { font-size: 23px; margin: 30px 0 4px; } h2 { font-size: 13px; margin-top: 24px; } .brand { font-size: 24px; font-weight: bold; color: #087f8c; } .muted { color: #5b6878; } table { border-collapse: collapse; width:100%; margin: 18px 0; table-layout: fixed; } td,th { border-bottom: 1px solid #dce3e9; padding: 10px 6px; text-align:left; overflow-wrap: break-word; } th { background: #edf5f6; } .number { text-align:right; } .total { font-size:16px; text-align:right; } .box { background:#f4f7fa; padding:14px; } .footer { position:fixed; bottom:-30px; font-size:8px; color:#5b6878; } .preline { white-space:pre-wrap; overflow-wrap:break-word; } tr { page-break-inside:avoid; }
-</style></head><body>
+</style><style>body,.box{word-wrap:break-word}.box{max-width:100%}h1,h2{page-break-after:avoid}</style></head><body>
 <div class="brand">Locamat</div><div class="muted">Gestion de location d’équipements · Démonstration universitaire</div>
 <h1><?= e($title) ?></h1><p>Référence <?= e(strtoupper($type)) ?>-<?= str_pad((string) $row['id'],6,'0',STR_PAD_LEFT) ?> · Location n°<?= (int) $row['id'] ?></p>
 <?php if ($type==='facture' && $row['statut']!=='terminee'): ?><p><strong>FACTURE PROVISOIRE — frais de retour non définitifs.</strong></p><?php endif ?>
@@ -17,5 +17,4 @@
 <?php else: ?><p><?= $row['date_paiement'] ? 'Facture acquittée.' : 'Paiement non enregistré.' ?></p><?php endif ?>
 <?php if ($row['date_retour']): ?><h2>Retour</h2><p>Restitué le <?= e(dateFr($row['date_retour'])) ?> · Maintenance : <?= (int) $row['retour_maintenance'] ?> · Endommagé : <?= (int) $row['retour_endommage'] ?></p><p class="preline"><?= e($row['remarques_retour']) ?></p><?php endif ?>
 <p class="muted">Montants de démonstration, sans calcul de taxe. Document généré à partir des données sauvegardées.</p>
-<div class="footer">Locamat · <?= e($title) ?> · Référence location <?= (int) $row['id'] ?></div>
 </body></html>

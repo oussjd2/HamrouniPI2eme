@@ -38,8 +38,8 @@ $actionButton=static function (string $action,string $caption,bool $danger=false
 <section class="panel"><h2><?= $inspect ? 'Contrôler et valider le retour' : 'Enregistrer le retour' ?></h2><p class="muted">Retour de la totalité des <?= (int) $row['quantite'] ?> unité(s). Les autres unités retournent en état disponible après validation.</p>
 <form method="post" action="<?= e(url('location-action')) ?>" class="form-grid" data-validate="retour" novalidate>
 <?= csrf() ?><input type="hidden" name="id" value="<?= $id ?>"><input type="hidden" name="action" value="<?= $inspect ? 'valider_retour' : 'retour' ?>">
-<?php if (!$inspect): field('date_retour','Date de retour',date('Y-m-d'),'date'); field('frais_additionnels','Frais additionnels','0.00'); endif ?>
-<?php field('retour_maintenance','Quantité en maintenance',$row['retour_maintenance']); field('retour_endommage','Quantité endommagée',$row['retour_endommage']); ?>
-<label class="wide">Remarques<textarea name="remarques_retour" rows="3"><?= e($row['remarques_retour']) ?></textarea></label>
+<?php if (!$inspect): field('date_retour','Date de retour',$returnInput['date_retour'] ?? date('Y-m-d'),'date'); field('frais_additionnels','Frais additionnels',$returnInput['frais_additionnels'] ?? '0.00'); endif ?>
+<?php field('retour_maintenance','Quantité en maintenance',$returnInput['retour_maintenance'] ?? $row['retour_maintenance']); field('retour_endommage','Quantité endommagée',$returnInput['retour_endommage'] ?? $row['retour_endommage']); ?>
+<label class="wide">Remarques<textarea name="remarques_retour" rows="3"><?= e($returnInput['remarques_retour'] ?? $row['remarques_retour']) ?></textarea></label>
 <p class="form-error wide" role="alert"></p><div class="wide"><button><?= $inspect ? 'Valider le retour et clôturer' : 'Transmettre au contrôle inventaire' ?></button></div>
 </form></section><?php endif ?>

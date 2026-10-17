@@ -1,6 +1,6 @@
 # Vérification et suivi
 
-Vérification effectuée le 17 octobre 2026. Ce document distingue l’implémentation, les preuves automatisées et l’acceptation visuelle encore à réaliser.
+Vérification effectuée le 17 octobre 2026. Les étapes 1 à 18 sont terminées : implémentation, contrôles automatisés, parcours navigateur et inspection visuelle des PDF. L’acceptation personnelle de l’utilisateur reste distincte de ces vérifications.
 
 ## Étapes 1 à 17
 
@@ -19,17 +19,17 @@ Vérification effectuée le 17 octobre 2026. Ce document distingue l’implémen
 | 11. Location | CRUD selon le statut, confirmation, refus, annulation et départ. Vérification des chevauchements et de la concurrence. |
 | 12. Retours | Enregistrement agent, inspection inventaire, clôture et états de stock vérifiés en base. |
 | 13. Facturation | Calcul en centimes, frais et paiement intégral après clôture, double paiement bloqué. |
-| 14. PDF | Contrat, facture et reçu générés et téléchargés; droits et identités figées vérifiés. Apparence pas encore inspectée. |
-| 15. Interface | Templates français, CSS responsive et JavaScript local implémentés. Rendu navigateur pas encore vérifié. |
+| 14. PDF | Contrat, facture et reçu générés et téléchargés; droits, identités figées, apparence et pagination inspectés. |
+| 15. Interface | Templates français, CSS responsive et JavaScript local implémentés et contrôlés dans Chrome desktop/mobile/tablette. |
 | 16. Contrôles et livraison | Syntaxe PHP/JS, Composer, documentation d’installation, comptes et guide de présentation. |
-| 17. Vérification fonctionnelle | 71 contrôles métier et 64 contrôles HTTP via Apache réussis. |
+| 17. Vérification fonctionnelle | 71 contrôles métier et 68 contrôles HTTP via Apache réussis après les corrections de l’étape 18. |
 
 ## Preuves automatisées
 
 - `scripts/check.php` : tous les fichiers PHP de l’application, configuration, scripts et tests passent la vérification de syntaxe avec PHP XAMPP.
 - `tests/integration.php` : 71 contrôles sur une base `hamrouni_test_*` créée vide puis nettoyée. Comprend CRUD, validations, protections d’historique, calculs, dates inclusives, locations successives, retards, retour, inspection, paiement et génération PDF.
 - Deux processus PHP distincts confirment simultanément des demandes portant sur les mêmes unités : une confirmation acceptée, l’autre refusée; la quantité réservée reste dans la capacité.
-- `tests/http.php` : 64 contrôles par requêtes cURL à `http://localhost/hamrouni/`. Comprend les contrôleurs, sessions, formulaires, rôles, propriété des documents, CSRF, échappement HTML et parcours complet. Les données temporaires sont retirées; aucun clic navigateur n’est simulé.
+- `tests/http.php` : 68 contrôles par requêtes cURL à `http://localhost/hamrouni/`. Comprend les contrôleurs, sessions, formulaires, rôles, propriété des documents, CSRF, échappement HTML, conservation des formulaires en erreur et parcours complet. Les données temporaires sont retirées; ce script reste distinct des parcours navigateur ci-dessous.
 - Composer : fichier valide et aucune alerte de vulnérabilité connue signalée par l’audit à la date de vérification.
 - Base de démonstration après nettoyage : 3 utilisateurs, 3 catégories, 7 équipements, 0 location.
 
@@ -39,20 +39,44 @@ Vérification effectuée le 17 octobre 2026. Ce document distingue l’implémen
 - Transactions : isolation READ COMMITTED et verrou de ligne équipement. Cela évite qu’une confirmation utilise une ancienne vue des réservations après l’attente d’un verrou.
 - Relecture des droits après verrouillage, détection d’un changement concurrent d’équipement, limite des montants et saisies malformées protégées.
 
-## Étape 18 — à faire ensuite
+## Étape 18 — terminée
 
-- [ ] Parcourir toutes les pages dans un navigateur pour chacun des trois rôles.
-- [ ] Effectuer manuellement les quatre CRUD et les cas de suppression protégée.
-- [ ] Effectuer le scénario complet client → agent → inventaire → paiement → téléchargement.
-- [ ] Vérifier les erreurs de saisie et les messages de succès/refus visibles.
-- [ ] Vérifier les mises en page desktop et mobile, navigation, formulaires, tableaux et filtres.
-- [ ] Ouvrir les trois types de PDF, rendre et inspecter toutes les pages : accents, montants, signatures, retours, débordements et lisibilité.
-- [ ] Comparer le rendu à la direction visuelle de DESIGN.md, avec les adaptations documentées.
+- [x] Parcourir les pages publiques et les pages autorisées des trois rôles dans Chrome.
+- [x] Exercer les quatre CRUD par les formulaires, liens, boutons et dialogues du navigateur, avec suppressions autorisées et protégées.
+- [x] Effectuer deux parcours client → agent → inventaire → paiement → téléchargement, dont un après correction.
+- [x] Vérifier les erreurs JavaScript et PHP, messages de succès/refus, annulation/refus de location et annulation du dialogue de suppression.
+- [x] Vérifier desktop (1440 et 1774 px), tablette (768 px), mobile (390 et 320 px), navigation, formulaires, tableaux et filtres.
+- [x] Télécharger les documents, rendre et inspecter toutes leurs pages : accents, montants, signatures, retours, débordements, pieds de page et lisibilité.
+- [x] Comparer le rendu à la direction visuelle de DESIGN.md, avec les adaptations documentées.
+
+### Méthode et preuves
+
+Browser plugin absent : Playwright a piloté Chrome installé, sans installer de dépendance navigateur dans le projet. Les formulaires et contrôles HTML réels ont été utilisés, avec sessions séparées pour les trois rôles. Il s’agit de scénarios opérés par l’agent dans un navigateur; aucun test par une personne sur téléphone physique n’est revendiqué.
+
+Premier passage : 43 points de contrôle réussis. Passage ciblé après corrections : 24 points réussis, incluant la suppression des catégories/équipements sans historique, l’inscription publique, le refus et l’annulation. Console sans erreur ou avertissement sur les parcours. Onze familles de pages capturées à 390 px, sans débordement horizontal du document; les tableaux larges défilent dans leur conteneur et leurs actions restent accessibles. Filtres et location finale vérifiés après rechargement.
+
+Le scénario de contrôle calcule 2 unités × 1 jour × 13,00 TND = 26,00 TND, puis 4,50 TND de frais = 30,50 TND. Le premier retour place une unité en état endommagé; le stock disponible passe de 5 à 4. Le paiement, les documents et le résultat rechargé restent cohérents.
+
+Cinq PDF ordinaires inspectés après le dernier correctif (contrat confirmé/final, facture provisoire/finale, reçu), une page chacun. Trois variantes de contenu long inspectées, deux pages chacune : noms aux longueurs maximales, e-mail long, équipement/catégorie sans espaces et remarques sur plusieurs lignes. Total : 11 pages inspectées. Poppler a produit les rendus PNG; pypdf a confirmé la présence du pied de page et de la pagination sur chacune des pages.
+
+Captures, résultats et scripts temporaires sont conservés hors dépôt :
+`C:\Users\OUSSAMA\.codex\visualizations\2026\10\17\01a14acc-8e3d-7ed1-9bde-b710a0217520\step18`.
+Fichiers principaux : `browser-results.json`, `recheck-results.json`, `final-desktop.png`, `final-mobile.png`, `return-validation-fixed.png`, `contrat-final.pdf`, `facture-finale.pdf`, `recu.pdf` et `stress-*.pdf`.
+
+### Constats corrigés et revérifiés
+
+1. Retour/inspection : les frais, quantités et remarques étaient effacés après une erreur serveur. Les valeurs saisies sont désormais conservées pour la location concernée, sans modifier les données enregistrées avant validation. Vérifié dans le navigateur et par quatre nouveaux contrôles HTTP.
+2. Filtre stock en alerte : case et texte empilés avec un espace inutile. Alignement corrigé desktop/mobile; activation et résultat vérifiés.
+3. PDF : e-mail long sortant du cadre client. Retour à la ligne corrigé et inspecté sur les trois types de document.
+4. PDF multipages : pied de page et pagination homogènes ajoutés sur chaque page; titres conservés avec le contenu suivant. Les 11 pages ont été rendues et inspectées après correction.
+
+Les données temporaires du navigateur ont été retirées après vérification de leurs identités exactes. Base laissée avec les 3 comptes, 3 catégories et 7 équipements d’origine, sans location.
 
 ## Étape 19 — après les contrôles visuels
 
-- [ ] Corriger les constats et répéter les contrôles concernés.
-- [ ] Terminer le parcours de démonstration et l’acceptation avec l’utilisateur.
-- [ ] Commit et push final des éventuelles corrections.
+- [x] Corriger les constats et répéter les contrôles concernés dans le cadre de l’étape 18.
+- [x] Parcours de démonstration effectué par l’agent.
+- [ ] Acceptation personnelle et préparation de la présentation avec l’utilisateur / son ami.
+- [x] Corrections et documentation enregistrées dans le dépôt privé.
 
-La réussite des tests automatisés ne constitue pas une validation graphique ou manuelle. Les étapes 18 et 19 restent volontairement ouvertes.
+La vérification est limitée à Chrome sur Windows et à des tailles d’écran simulées. Safari, Firefox et téléphone physique n’ont pas été testés. Aucun défaut bloquant connu ne reste à l’issue de l’étape 18.

@@ -4,7 +4,7 @@
 
 Projet universitaire de gestion de location d’équipements, commencé à zéro. Garder le périmètre simple, les quatre entités du sujet, PHP 8 MVC PDO sans framework, interface française et GitHub privé. L’utilisateur a autorisé les étapes 1 à 17; les vérifications GUI et manuelles doivent avoir lieu après l’implémentation, à l’étape 18.
 
-L’implémentation et les vérifications automatisées sont terminées. Se référer à VERIFICATION.md pour les preuves et limites. Ne pas annoncer que les contrôles visuels ou l’acceptation manuelle sont déjà faits.
+Les étapes 1 à 18 sont terminées. L’utilisateur a ensuite demandé de terminer l’étape 18 : parcours navigateur des trois rôles, CRUD, responsive et PDF ont été vérifiés, et les constats corrigés. Se référer à VERIFICATION.md pour les preuves et limites. Ne pas confondre ces parcours opérés par l’agent avec une acceptation personnelle de l’utilisateur.
 
 ## Accès
 
@@ -17,7 +17,9 @@ L’implémentation et les vérifications automatisées sont terminées. Se réf
 
 ## Prochaine action
 
-Étape 18 : navigateur et scénario manuel, contrôle responsive et inspection visuelle des PDF. Aucune validation visuelle de l’application n’a encore été effectuée. Ensuite, corriger uniquement les constats et finaliser l’acceptation.
+Acceptation personnelle et préparation de la présentation avec l’utilisateur / son ami. Aucun défaut bloquant connu. La validation a utilisé Chrome Windows avec tailles simulées; téléphone physique et autres navigateurs non testés.
+
+Derniers résultats : 71 contrôles métier, 68 contrôles HTTP, 43 points de contrôle navigateur initiaux et 24 ciblés après correction. Cinq PDF ordinaires et trois variantes longues inspectés (11 pages). Les saisies retour/inspection sont conservées après erreur; case d’alerte alignée; PDF corrigés pour e-mail long et pagination. Base de démonstration restaurée à 3 utilisateurs, 3 catégories, 7 équipements, 0 location. Captures hors dépôt dans le dossier indiqué par VERIFICATION.md.
 
 ## Points métier à conserver
 

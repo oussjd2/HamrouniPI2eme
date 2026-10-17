@@ -92,7 +92,7 @@ try {
     check($paid['montant_paye']==='89.50' && $paid['date_paiement']!==null,'Paiement intégral sauvegardé');
     rejects(fn()=>L::action($r,'payer',[],$agent),'Double paiement refusé');
     foreach (['contrat','facture','recu'] as $type) {
-        $pdf=new Dompdf\Dompdf(); $pdf->loadHtml(DocumentController::html($paid,$type)); $pdf->setPaper('A4'); $pdf->render();
+        $pdf=DocumentController::pdf($paid,$type);
         check(str_starts_with($pdf->output(),'%PDF-') && strlen($pdf->output())>1000,'Génération PDF '.$type);
     }
     // Non-overlapping reservations must not be summed together.

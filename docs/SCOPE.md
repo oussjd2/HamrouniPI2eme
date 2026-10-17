@@ -25,4 +25,4 @@ Application universitaire PHP 8, MVC, PDO MySQL, sans framework. Interface fran�
 
 ## Ordre de validation
 
-Étapes 1–16 : environnement, implémentation, syntaxe, contrôles ciblés. Étape 17 : installation propre sur une base de test, contrôles automatisés fonctionnels et HTTP. Étape 18 : navigateur, responsive et vérification visuelle des PDF (différés à la demande de l'utilisateur). Étape 19 : corrections finales et acceptation.
+Étapes 1–16 : environnement, implémentation, syntaxe, contrôles ciblés. Étape 17 : installation propre sur une base de test, contrôles automatisés fonctionnels et HTTP. Étape 18 : navigateur, responsive et vérification visuelle des PDF, terminés après autorisation de l’utilisateur. Étape 19 : corrections revérifiées; acceptation personnelle de l’utilisateur et préparation de la présentation à suivre.

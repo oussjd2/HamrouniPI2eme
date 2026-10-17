@@ -24,12 +24,28 @@ final class LocationController {
     public function show(): void {
         $actor=Auth::requireRoles(['client','agent','inventaire']);
         $row=Location::accessible(V::integer($_GET,'id','Location',1),$actor);
-        View::render('locations/show',['title'=>'Location n°' . $row['id'],'row'=>$row]);
+        $returnInput=[];
+        if ((int) ($_SESSION['return_input']['id'] ?? 0)===(int) $row['id']) {
+            $returnInput=$_SESSION['return_input']['data'];
+            unset($_SESSION['return_input']);
+        }
+        View::render('locations/show',['title'=>'Location n°' . $row['id'],'row'=>$row,'returnInput'=>$returnInput]);
     }
     public function action(): void {
         $actor=Auth::requireRoles(['client','agent','inventaire']); $id=V::integer($_POST,'id','Location',1);
-        try { Location::action($id,is_string($_POST['action'] ?? null) ? $_POST['action'] : '',$_POST,$actor); \flash('Location mise à jour.'); }
-        catch (DomainException $e) { \flash($e->getMessage(),'error'); }
+        $action=is_string($_POST['action'] ?? null) ? $_POST['action'] : '';
+        unset($_SESSION['return_input']);
+        try { Location::action($id,$action,$_POST,$actor); \flash('Location mise à jour.'); }
+        catch (DomainException $e) {
+            if (in_array($action,['retour','valider_retour'],true)) {
+                $input=[];
+                foreach (['date_retour','frais_additionnels','retour_maintenance','retour_endommage','remarques_retour'] as $key) {
+                    if (is_string($_POST[$key] ?? null)) { $input[$key]=mb_substr($_POST[$key],0,2000); }
+                }
+                $_SESSION['return_input']=['id'=>$id,'data'=>$input];
+            }
+            \flash($e->getMessage(),'error');
+        }
         \redirect('location',['id'=>$id]);
     }
     public function delete(): void {

@@ -90,4 +90,4 @@ Les journaux applicatifs sont dans `storage/logs/application.log`. Les erreurs t
 
 ## État de livraison
 
-Implémentation et contrôles automatisés : voir [docs/VERIFICATION.md](docs/VERIFICATION.md). La validation GUI, responsive et visuelle des PDF est volontairement réservée à l’étape 18; elle ne doit pas être considérée comme déjà réalisée.
+Étapes 1 à 18 terminées : implémentation, contrôles automatisés, parcours GUI des trois rôles, responsive et inspection visuelle des PDF. Résultats et limites dans [docs/VERIFICATION.md](docs/VERIFICATION.md). La base de démonstration reste propre. L’acceptation personnelle et la préparation de la présentation peuvent maintenant être faites avec l’utilisateur.

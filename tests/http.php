@@ -95,9 +95,17 @@ try {
     $agent->post('location-action',['id'=>$locationId,'action'=>'depart']);
     verify(DB::query('SELECT statut FROM locations WHERE id=?',[$locationId])->fetchColumn()==='en_cours','Départ HTTP persisté');
     verify($agent->request('location',['id'=>$locationId])['status']===200,'Page retour agent');
+    $agent->post('location-action',['id'=>$locationId,'action'=>'retour','date_retour'=>$today,'retour_maintenance'=>2,'retour_endommage'=>1,'frais_additionnels'=>'4.50','remarques_retour'=>'Saisie à conserver']);
+    verify(DB::query('SELECT statut FROM locations WHERE id=?',[$locationId])->fetchColumn()==='en_cours','Retour invalide sans changement de statut');
+    $invalidReturn=$agent->request('location',['id'=>$locationId]);
+    verify(str_contains($invalidReturn['body'],'name="frais_additionnels" type="text" value="4.50"') && str_contains($invalidReturn['body'],'Saisie à conserver') && str_contains($invalidReturn['body'],'name="retour_maintenance" type="text" value="2"'),'Frais, quantités et remarques conservés après erreur retour');
     $agent->post('location-action',['id'=>$locationId,'action'=>'retour','date_retour'=>$today,'retour_maintenance'=>0,'retour_endommage'=>1,'frais_additionnels'=>'4.50','remarques_retour'=>'Contrôle HTTP']);
     verify(DB::query('SELECT statut FROM locations WHERE id=?',[$locationId])->fetchColumn()==='retour_a_controler','Retour HTTP persisté');
     verify($manager->request('location',['id'=>$locationId])['status']===200,'Page inspection responsable');
+    $manager->post('location-action',['id'=>$locationId,'action'=>'valider_retour','retour_maintenance'=>2,'retour_endommage'=>1,'remarques_retour'=>'Inspection à conserver']);
+    verify(DB::query('SELECT statut FROM locations WHERE id=?',[$locationId])->fetchColumn()==='retour_a_controler','Inspection invalide sans clôture');
+    $invalidInspection=$manager->request('location',['id'=>$locationId]);
+    verify(str_contains($invalidInspection['body'],'Inspection à conserver') && str_contains($invalidInspection['body'],'name="retour_maintenance" type="text" value="2"'),'Saisie inspection conservée après erreur');
     $manager->post('location-action',['id'=>$locationId,'action'=>'valider_retour','retour_maintenance'=>0,'retour_endommage'=>1,'remarques_retour'=>'Validé']);
     verify(DB::query('SELECT statut FROM locations WHERE id=?',[$locationId])->fetchColumn()==='terminee','Inspection HTTP persistée');
     $agent->post('location-action',['id'=>$locationId,'action'=>'payer']);
