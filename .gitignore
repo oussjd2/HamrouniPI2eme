@@ -1,0 +1,9 @@
+/vendor/
+/config/local.php
+/storage/*
+!/storage/.gitkeep
+/tests/.runtime/
+/.idea/
+/.vscode/
+Thumbs.db
+*.log

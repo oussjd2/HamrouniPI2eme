@@ -1,0 +1,7 @@
+{
+  "name": "hamrouni/locamat",
+  "description": "Projet universitaire de location d'équipements en PHP MVC et PDO",
+  "type": "project",
+  "require": {"php": ">=8.0", "ext-pdo": "*", "ext-pdo_mysql": "*", "ext-mbstring": "*", "dompdf/dompdf": "^3.1"},
+  "autoload": {"psr-4": {"App\\": "app/"}}
+}
